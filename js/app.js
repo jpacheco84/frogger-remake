@@ -109,16 +109,16 @@ var Factory = function(){
             randSpeed = getRandomInt(20, 100);
             setTimeout(
                 allEnemies.push(new Enemy(randSpeed, laneY)), 500);
-            this.count += 1;
+            
         });
-        
+        this.count++;
     }
 
     this.count = 0;
 }
 
 var enemies = new Factory();
-while(enemies.count < 21){
+while(enemies.count < 3){
     enemies.create();
 }
 
