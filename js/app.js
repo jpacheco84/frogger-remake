@@ -10,7 +10,6 @@ var Enemy = function(speed, lane) {
     this.x = 0;
     this.y = lane;
 
-
 };
 
 // Update the enemy's position, required method for game
@@ -38,19 +37,29 @@ Enemy.prototype.render = function() {
 var Player = function(){
 
     this.sprite = 'images/char-boy.png';
-    this.x = 101 * 2;
-    this.y = 83 * 5;
-    
+    this.moving = false;
     this.direction = '';
+    this.reset = function(){
+        this.x = 101 * 2;
+        this.y = 83 * 5;
+
+    }
 
 };
 
 Player.prototype.update = function(dt) {
 
-    
-    //move == 'up' ? this.y += this.speed * dt : moving = false;
+    // if(this.moving){
+    //     if(this.y > 415){
+    //         prt("y over");
+    //     }
+    //     if(this.x > 404){
+    //         prt("x over");
+    //     }    
+        
+    // }
 
-    
+    // return false;
 };
 
 Player.prototype.render = function() {
@@ -60,25 +69,62 @@ Player.prototype.render = function() {
 Player.prototype.handleInput = function(dir) {
 
     this.direction = dir;
+    this.moving = true;
+    if(dir == 'up'){
+        this.y -= 83;
+        this.moving = false;
+    }
+    if(dir =='down'){
+        this.y += 83; 
+        this.moving = false;
+    }
+    if(dir =='left'){
+        this.x -= 101;
+        this.moving = false;
+    }
+    if(dir =='right'){
+        this.x += 101; 
+        this.moving = false;
+    }
+
+    if(this.y<83){this.reset()}
+    if(this.y>415){this.y = 415}
+    if(this.x<0){this.x = 0}
+    if(this.x>404){this.x = 404}
+
+    prt("x: "+this.x+" y: "+ this.y);
    
 }
 
-
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
 var allEnemies = [];
-var randSpeed;
-var enemyLanesY = [83, 166, 249];
 
-enemyLanesY.forEach(function (laneY) {
-    randSpeed = getRandomInt(2, 10) * 10;
-    setTimeout(
-        allEnemies.push(new Enemy(randSpeed, laneY)), 500);
-});
+var Factory = function(){
+// Place all enemy objects in an array called allEnemies
+    this.create = function(){
 
+        var randSpeed;
+        var enemyLanesY = [83, 166, 249];
+
+        enemyLanesY.forEach(function (laneY) {
+            randSpeed = getRandomInt(20, 100);
+            setTimeout(
+                allEnemies.push(new Enemy(randSpeed, laneY)), 500);
+            this.count += 1;
+        });
+        
+    }
+
+    this.count = 0;
+}
+
+var enemies = new Factory();
+while(enemies.count < 21){
+    enemies.create();
+}
+
+// Place the player object in a variable called player
 var player = new Player();
-//TODO: Setting the Enemy initial location
+player.reset();
 
 
 function getRandomInt(min, max) {
@@ -97,7 +143,6 @@ document.addEventListener('keyup', function(e) {
         39: 'right',
         40: 'down'
     };
-    prt("Pressed Key: "+allowedKeys[e.keyCode]);
-
+    
     player.handleInput(allowedKeys[e.keyCode]);
 });
