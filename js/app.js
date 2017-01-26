@@ -9,7 +9,6 @@ var Enemy = function(speed, lane) {
     this.bug_speed = speed;
     this.x = 0;
     this.y = lane;
-    
     this.boundingbox = {
        top: 85,// The y-value of the top of the rectangle
        left: 3,// the x-value of the left side of the rectangle
@@ -17,7 +16,6 @@ var Enemy = function(speed, lane) {
        right: 98// the x-value of the right side of the rectangle
       
     };
-
     this.width =  this.boundingbox.right - this.boundingbox.left;
     this.height = this.boundingbox.bottom - this.boundingbox.top;
 
@@ -145,6 +143,19 @@ var Factory = function(){
     }
 
     this.count = 0;
+
+    this.getRelationship = function(a, b){
+        var n,m;
+        if(!isNaN(a) && !isNaN(b)){
+           return Number(a) > Number(b)?">": Number(a) < Number(b)?"<": "parameters are equals";
+        }else{
+            n = (isNaN(a) && a)?"not a number": a;
+            m = (isNaN(b) && b)?"not a number": b;
+            return "Can't make a relationship because first parameter is"+n+" and second parameter is "+m;
+
+        }
+
+    }
 }
 
 var enemies = new Factory();
