@@ -4,7 +4,7 @@ var reload = browserSync.reload;
 
 // process JS files and return the stream.
 gulp.task('js', function () {
-    return gulp.src('js/*js')
+    return gulp.src('js/*.js')
         //.pipe(browserify())
         //.pipe(uglify())
         .pipe(gulp.dest('dist/js'));
