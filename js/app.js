@@ -18,9 +18,8 @@ var Enemy = function(speed, lane) {
     };
     this.width =  this.boundingbox.right - this.boundingbox.left;
     this.height = this.boundingbox.bottom - this.boundingbox.top;
-
+    this.expired = false;
 };
-
 /*These update methods should focus purely on updating
  * the data/properties related to the object. Do your drawing in your
  * render methods.
@@ -29,12 +28,14 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-    this.x = this.bug_speed * dt + this.x;
+
+    this.x = this.x + this.bug_speed * dt;
     
-    if(this.x>505){
-       var bug_idx = allEnemies.indexOf(this);
-       allEnemies.splice(bug_idx, 1);
+    if(this.x > ctx.canvas.clientWidth){
+        this.expired = true;
+
     }
+
     //Handle collision with the Player
     //https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
     if(player.x < this.x + this.width && player.x + player.width > this.x &&
@@ -120,50 +121,59 @@ Player.prototype.handleInput = function(dir) {
 }
 // Place all enemy objects in an array
 var allEnemies = [];
+function createEnemie(num){
 
-var Factory = function(){
+    var r,
+    randSpeed,
+    last,
+    now,
+    enemyLanesY = [83, 166, 249];
 
-    this.create = function(){
 
-        var randSpeed;
-        var enemyLanesY = [83, 166, 249];
-
-        enemyLanesY.forEach(function (laneY) {
-            randSpeed = getRandomInt(20, 100);
-            setTimeout(
-                allEnemies.push(new Enemy(randSpeed, laneY)), 500);
-            randSpeed = '';
-        });
-        this.count++;
+    for(var n = num; num>allEnemies.length; n--){
+    
+    
+        r = getRandomInt(0, 2);
+        randSpeed = getRandomInt(20, 100);
+        
+        setTimeout(
+            allEnemies.push(new Enemy(randSpeed, enemyLanesY[r])), 1000);
     }
 
-    this.continue = function(){
-        //TODO: don't stop producing enemies
+}
 
-    }
+function deleteEnemy(){
+    for (var i = 0; i < allEnemies.length; i++) {
 
-    this.count = 0;
-
-    this.getRelationship = function(a, b){
-        var n,m;
-        if(!isNaN(a) && !isNaN(b)){
-           return Number(a) > Number(b)?">": Number(a) < Number(b)?"<": "parameters are equals";
-        }else{
-            n = (isNaN(a) && a)?"not a number": a;
-            m = (isNaN(b) && b)?"not a number": b;
-            return "Can't make a relationship because first parameter is"+n+" and second parameter is "+m;
-
+        if(allEnemies[i].expired){
+            
+            allEnemies.splice(allEnemies[i], 1);
+            i--;
+            console.log(allEnemies.length);
         }
-
     }
 }
 
-var enemies = new Factory();
-while(enemies.count < 3){
-    enemies.create();
+function countdown() {
+    createEnemie(10);
+
+    var seconds = 20;//GAME TIMER
+    function tick() {
+                deleteEnemy();
+        seconds--;
+        if( seconds > 0 ) {
+            setTimeout(tick, 1000);
+        } else {
+            console.log("Game over");
+            countdown();
+        }
+    }
+    tick();
+
 }
 
-// Place the player object in a variable called player
+countdown();
+
 var player = new Player();
 player.reset();
 
