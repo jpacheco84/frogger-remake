@@ -1,13 +1,13 @@
 // Enemies our player must avoid
-var Enemy = function(speed, lane) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
+var Enemy = function(num, speed, lane) {
+    // var obj = Object.create(Enemy.prototype);
+    // 
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
     this.bug_speed = speed;
-    this.x = 0;
+    this.x = -200;
     this.y = lane;
     this.boundingbox = {
        top: 85,// The y-value of the top of the rectangle
@@ -19,6 +19,9 @@ var Enemy = function(speed, lane) {
     this.width =  this.boundingbox.right - this.boundingbox.left;
     this.height = this.boundingbox.bottom - this.boundingbox.top;
     this.expired = false;
+    this.number = num;
+
+    //return obj;
 };
 /*These update methods should focus purely on updating
  * the data/properties related to the object. Do your drawing in your
@@ -31,7 +34,7 @@ Enemy.prototype.update = function(dt) {
 
     this.x = this.x + this.bug_speed * dt;
     
-    if(this.x > ctx.canvas.clientWidth){
+    if(this.x > ctx.canvas.clientWidth+200){
         this.expired = true;
 
     }
@@ -40,8 +43,10 @@ Enemy.prototype.update = function(dt) {
     //https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
     if(player.x < this.x + this.width && player.x + player.width > this.x &&
         player.y < this.y + this.height && player.height + player.y > this.y){
-        //prt(true);
-        player.reset();
+        prt("GAME OVER");
+        game.game_over = true;
+        game.gameOver();
+        //GAME OVER
     }
 };
 
@@ -121,61 +126,123 @@ Player.prototype.handleInput = function(dir) {
 }
 // Place all enemy objects in an array
 var allEnemies = [];
-function createEnemie(num){
+
+
+function createEnemy(num){
 
     var r,
     randSpeed,
     last,
     now,
-    enemyLanesY = [83, 166, 249];
+    enemyLanesY = [83, 166, 249, 332, 415];
 
 
-    for(var n = num; num>allEnemies.length; n--){
+    for(var n = 0; n < num; n++){
     
     
-        r = getRandomInt(0, 2);
+        r = getRandomInt(0, 5);
         randSpeed = getRandomInt(20, 100);
         
-        setTimeout(
-            allEnemies.push(new Enemy(randSpeed, enemyLanesY[r])), 1000);
+        //setTimeout(, 1000)
+        allEnemies.push(new Enemy(n,randSpeed, enemyLanesY[r]));
     }
-
 }
-
-function deleteEnemy(){
-    for (var i = 0; i < allEnemies.length; i++) {
-
+function resetGame(){
+    prt("Time over!");
+    allEnemies = [];
+    player.reset();
+}
+function deleteEnemy(num){
+    
+    allEnemies = [];
+    /*for (var i = 0; i < allEnemies.length; i++) {
+        find(allEnemies[i].number);
         if(allEnemies[i].expired){
             
-            allEnemies.splice(allEnemies[i], 1);
-            i--;
             console.log(allEnemies.length);
         }
+    }*/
+}
+function countdown(){
+    createEnemy(5);
+
+    var seconds = 10;//GAME TIMER
+    function tick() {
+        prt(seconds);
+        seconds--;
+        if( seconds > -1 ) {
+            setTimeout(tick, 1000);
+        } else {
+            resetGame();
+
+        }
+    }
+    tick();
+}
+function gameOver(){
+    prt("game over");
+}
+
+var Game = function(){
+
+    this.enemies = 0;
+
+    this.levelNum = -1;
+
+    this.seconds = 10;
+
+    this.level = [5,10,15,25];
+
+    this.game_over = false;
+}    
+
+Game.prototype.createGameLevel = function(){
+        allEnemies = [];
+        this.levelNum = this.levelNum + 1;
+
+        var ind = this.levelNum;
+        player.reset();
+        var qt = this.level[ind];
+
+        this.enemies = qt;
+        //create enemies * this.enemies
+        if(!this.game_over){
+            if(qt){
+                createEnemy(this.enemies);
+                //start countdown
+                this.start();
+            }else{
+
+                //Won the game
+                this.gameOver();
+            }
+        }
+}
+
+Game.prototype.gameOver = function(){
+
+    allEnemies = [];
+
+    if(!this.game_over){
+        alert("You Won!?!?");
+    }else{
+        alert("You Lost!!!!!!!!!!!!!!.................");
+        player.reset();
     }
 }
 
-function countdown() {
-    createEnemie(10);
+Game.prototype.start = function(){
 
-    var seconds = 20;//GAME TIMER
-    function tick() {
-                deleteEnemy();
-        seconds--;
-        if( seconds > 0 ) {
-            setTimeout(tick, 1000);
-        } else {
-            console.log("Game over");
-            countdown();
-        }
-    }
+    this.seconds = 10;
     tick();
 
 }
 
-countdown();
-
 var player = new Player();
 player.reset();
+
+var game = new Game();
+game.createGameLevel(game);
 
 var allowedKeys = {
         37: 'left',
@@ -183,6 +250,19 @@ var allowedKeys = {
         39: 'right',
         40: 'down'
     };
+
+function tick(){
+    game.seconds = game.seconds -1;
+                    prt(game.seconds);
+    if( game.seconds > 0 ){
+        setTimeout(tick, 1000);
+    } else {
+        //Player survived another level
+        //upgrade game level
+        game.createGameLevel(game);
+    }
+}
+
 
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
